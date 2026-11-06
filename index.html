@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Video</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#000;overflow:hidden}
+main{position:relative;width:100%;height:100%;background:#000}
+video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);color:#fff;border:0;font:600 17px system-ui,-apple-system,sans-serif;cursor:pointer;z-index:2}
+#overlay span{padding:15px 22px;border-radius:30px;background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.55)}
+#overlay[hidden]{display:none}#error{position:absolute;left:12px;right:12px;bottom:24px;text-align:center;color:white;font:14px system-ui,-apple-system,sans-serif;display:none;z-index:3}
+</style>
+</head>
+<body>
+<main>
+<video id="v" src="video.mp4" poster="poster.jpg" autoplay muted playsinline webkit-playsinline preload="metadata" disablepictureinpicture></video>
+<button id="overlay" hidden type="button" aria-label="Chạm để phát video"><span>▶ Chạm để xem video</span></button>
+<div id="error" role="alert">Không tải được video. Hãy tải lại trang hoặc mở bằng Safari.</div>
+</main>
+<script>
+(function(){
+ var v=document.getElementById('v'),b=document.getElementById('overlay'),err=document.getElementById('error');
+ var ended=false;
+ v.muted=true;v.defaultMuted=true;
+ v.setAttribute("muted","");v.setAttribute("playsinline","");
+ function show(){if(!ended)b.hidden=false}
+ function play(){
+  if(ended)return;
+  var result;
+  try{v.muted=true;result=v.play()}catch(e){show();return}
+  if(result&&typeof result.then==='function'){result.then(function(){b.hidden=true;err.style.display='none'}).catch(show)}
+ }
+ b.addEventListener('click',function(e){e.stopPropagation();play()});
+ v.addEventListener('playing',function(){b.hidden=true;err.style.display='none'});
+ v.addEventListener('pause',function(){if(!ended)show()});
+ v.addEventListener('error',function(){show();err.style.display='block'});
+ v.addEventListener('ended',function(){ended=true;b.hidden=true;v.pause()});
+ document.addEventListener('visibilitychange',function(){if(!document.hidden&&!ended)play()});
+ window.addEventListener('pageshow',function(){if(!ended)play()});
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',play);else play();
+})();
+</script>
+</body>
+</html>
